@@ -1,9 +1,19 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
+import fetchSuggestion from '~/lib/open-ai/chat-gpt/fetchSuggestion';
+import useSWR from 'swr';
 
 export default function PromptInput() {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
+
+  const { data: suggestion, isLoading } = useSWR(
+    '/api/suggestions',
+    fetchSuggestion,
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   return (
     <div className="m-10">
@@ -20,8 +30,8 @@ export default function PromptInput() {
           disabled={!input}
           className={`p-4 font-bold transition-colors duration-200 ${
             input
-              ? "bg-violet-500 text-white"
-              : "text-gray-300 cursor-not-allowed"
+              ? 'bg-violet-500 text-white'
+              : 'text-gray-300 cursor-not-allowed'
           }`}
         >
           Generate
