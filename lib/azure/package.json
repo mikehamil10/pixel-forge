@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@azure/functions": "^4.0.0-alpha.7",
-    "openapi": "^1.0.1"
+    "openai": "^3.2.1"
   },
   "devDependencies": {
     "@types/node": "^18.x",
