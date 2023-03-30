@@ -7,19 +7,26 @@ import useSWR from 'swr';
 export default function PromptInput() {
   const [input, setInput] = useState('');
 
-  const { data: suggestion, isLoading } = useSWR(
-    '/api/suggestions',
-    fetchSuggestion,
-    {
-      revalidateOnFocus: false,
-    },
-  );
+  const {
+    data: suggestion,
+    isLoading,
+    isValidating,
+    mutate,
+  } = useSWR('/api/suggestions', fetchSuggestion, {
+    revalidateOnFocus: false,
+  });
+
+  const loading = isLoading || isValidating;
 
   return (
     <div className="m-10">
       <form className="flex flex-col lg:flex-row border rounded-md shadow-md shadow-slate-400/10 lg:divide-x">
         <textarea
-          placeholder="Enter a subject or press 'New Suggestion' for inspiration..."
+          placeholder={
+            (loading && 'Thinking of an awesome idea...') ||
+            suggestion ||
+            "Enter a suggestion or press 'New Suggestion' for inspiration..."
+          }
           className="flex-1 p-4 outline-none rounded-md"
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -45,10 +52,20 @@ export default function PromptInput() {
         <button
           type="button"
           className="p-4 bg-white text-violet-500 font-bold border-none transition-colors rounded-b-md md:rounded-r-md md:rounded-bl-none duration-200"
+          onClick={mutate}
         >
           New Suggestion
         </button>
       </form>
+
+      {input && (
+        <p className="italic p-2 pl-2 font-light">
+          Suggestion:{' '}
+          <span className="text-violet-500">
+            {loading ? 'Thinking of an awesome idea...' : suggestion}
+          </span>
+        </p>
+      )}
     </div>
   );
 }
