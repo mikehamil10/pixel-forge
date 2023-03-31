@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import fetchSuggestion from '~/lib/open-ai/chat-gpt/fetchSuggestion';
 import useSWR from 'swr';
 
@@ -18,9 +18,33 @@ export default function PromptInput() {
 
   const loading = isLoading || isValidating;
 
+  const submitPrompt = async (useSuggestion?: boolean) => {
+    const inputPrompt = input;
+    setInput('');
+
+    const p = useSuggestion ? suggestion : inputPrompt;
+    const res = await fetch('/api/images', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt: p }),
+    });
+
+    const data = await res.json();
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await submitPrompt();
+  };
+
   return (
     <div className="m-10">
-      <form className="flex flex-col lg:flex-row border rounded-md shadow-md shadow-slate-400/10 lg:divide-x">
+      <form
+        className="flex flex-col lg:flex-row border rounded-md shadow-md shadow-slate-400/10 lg:divide-x"
+        onSubmit={handleSubmit}
+      >
         <textarea
           placeholder={
             (loading && 'Thinking of an awesome idea...') ||
@@ -46,6 +70,7 @@ export default function PromptInput() {
         <button
           type="button"
           className="p-4 bg-violet-400 text-white font-bold transition-colors duration-200 disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-400"
+          onClick={() => submitPrompt(true)}
         >
           Use Suggestion
         </button>
