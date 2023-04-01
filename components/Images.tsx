@@ -14,12 +14,25 @@ export default function Images() {
   const {
     data: images,
     isLoading,
-    mutate: refresh,
+    mutate: refreshImages,
     isValidating,
   } = useSWR<ImageType[]>('/api/images', fetchImages);
 
   return (
     <div>
+      <button
+        className="fixed bottom-10 right-10 bg-violet-400/90 hover:bg-violet-500 text-white px-5 py-3 rounded-md font-bold focus:ring-2 focus:ring-violet-400 z-20"
+        onClick={() => refreshImages(images)}
+      >
+        {!isLoading && isValidating ? 'Refreshing...' : 'Refresh Images'}
+      </button>
+
+      {isLoading && (
+        <p className="animate-pulse text-center pb-7 font-extralight">
+          Loading Images..
+        </p>
+      )}
+
       <div className="px-0 md:px-10 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {images?.map((image, index) => (
           <div
