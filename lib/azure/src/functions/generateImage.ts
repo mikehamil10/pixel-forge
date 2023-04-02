@@ -1,17 +1,17 @@
 import {
-  app,
   HttpRequest,
-  HttpResponseInit,
   InvocationContext,
+  app,
+  type HttpResponseInit,
 } from '@azure/functions';
+import { BlobServiceClient } from '@azure/storage-blob';
+import type { CreateImageRequest } from 'openai';
 import { openAI } from '../lib/open-ai';
 import {
   azureAccountName,
   azureContainerName,
   generateSASToken,
 } from '../utils';
-import { BlobServiceClient } from '@azure/storage-blob';
-import { CreateImageRequest } from 'openai';
 
 interface GenerateImageRequest {
   prompt: string;
@@ -21,31 +21,36 @@ export async function generateImage(
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
-  const { prompt } = (await request.json()) as GenerateImageRequest;
-
-  const response = await openAI.createImage({
-    prompt: prompt,
-    n: 1,
-    size: '1024x1024',
-  } as CreateImageRequest);
-  const imageUrl = response.data.data[0].url;
-  const res = await fetch(imageUrl);
-  const blob = await res.arrayBuffer();
-
-  const token = generateSASToken();
-
-  const blobServiceClient = new BlobServiceClient(
-    `https://${azureAccountName}.blob.core.windows.net?${token}`,
-  );
-
-  const containerClient =
-    blobServiceClient.getContainerClient(azureContainerName);
-
-  const newFileName = `${prompt}_${new Date().getTime()}.png`;
-
   try {
-    const blockBlobClient = containerClient.getBlockBlobClient(newFileName);
-    await blockBlobClient.uploadData(blob);
+    const { prompt } = (await request.json()) as GenerateImageRequest;
+
+    // Generate image
+    const response = await openAI.createImage({
+      prompt: prompt,
+      n: 1,
+      size: '1024x1024',
+    } as CreateImageRequest);
+
+    // Store image in memory as arraybuffer
+    const imageResponse = await fetch(response.data.data[0]!.url!);
+    if (!imageResponse.ok) {
+      throw new Error(`Unexpected response ${imageResponse.statusText}`);
+    }
+
+    // Upload blob to Azure
+    const blobServiceClient = new BlobServiceClient(
+      `https://${azureAccountName}.blob.core.windows.net?${generateSASToken()}`,
+    );
+
+    const containerClient =
+      blobServiceClient.getContainerClient(azureContainerName);
+
+    const blockBlobClient = containerClient.getBlockBlobClient(
+      `${prompt}_${new Date().getTime()}.png`,
+    );
+
+    const imageData = await imageResponse!.arrayBuffer();
+    await blockBlobClient.uploadData(imageData);
 
     return { body: 'success' };
   } catch (error: any) {

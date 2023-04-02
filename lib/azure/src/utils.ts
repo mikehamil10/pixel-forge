@@ -5,10 +5,10 @@ import {
   generateBlobSASQueryParameters,
 } from '@azure/storage-blob';
 
-export const azureAccountName = process.env.AZURE_ACCOUNT_NAME;
-export const azureContainerName = process.env.AZURE_CONTAINER_NAME;
-export const azureAccountKey = process.env.AZURE_ACCOUNT_KEY;
-const azureSASExpiry = parseInt(process.env.AZURE_SAS_EXPIRY);
+export const azureAccountName = process.env.AZURE_ACCOUNT_NAME!;
+export const azureContainerName = process.env.AZURE_CONTAINER_NAME!;
+export const azureAccountKey = process.env.AZURE_ACCOUNT_KEY!;
+const azureSASExpiry = parseInt(process.env.AZURE_SAS_EXPIRY)!;
 
 const sharedKeyCredential = new StorageSharedKeyCredential(
   azureAccountName,

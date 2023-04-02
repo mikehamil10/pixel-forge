@@ -1,6 +1,6 @@
 export async function GET(request: Request) {
   const response = await fetch(
-    'http://127.0.0.1:3001/api/getChatGPTSuggestion',
+    `${process.env.AZURE_ENDPOINT_BASE_URL}/api/getChatGPTSuggestion`,
     {
       cache: 'no-store',
     },
