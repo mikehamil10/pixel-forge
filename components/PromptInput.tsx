@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import toast from 'react-hot-toast';
 import useSWR from 'swr';
 import { useImageFeed } from '~/hooks/useImageFeed';
 import fetchSuggestion from '~/lib/open-ai/chat-gpt/fetchSuggestion';
@@ -14,28 +15,45 @@ export default function PromptInput() {
     isLoading,
     isValidating,
     mutate: newSuggestion,
-  } = useSWR('/api/suggestions', fetchSuggestion, {
+  } = useSWR<string>('/api/suggestions', fetchSuggestion, {
     revalidateOnFocus: false,
   });
 
   const loading = isLoading || isValidating;
 
   const submitPrompt = async (useSuggestion?: boolean) => {
-    const inputPrompt = input;
+    const prompt = useSuggestion ? suggestion! : input;
     setInput('');
 
-    const p = useSuggestion ? suggestion : inputPrompt;
+    // Show a loading notification
+    const notification = toast.loading(
+      `DALL-E is creating: '${prompt.slice(0, 20)}...'`,
+    );
+
     const res = await fetch('/api/images', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prompt: p }),
+      body: JSON.stringify({ prompt }),
     });
 
-    await res.json();
-    refresh();
-    newSuggestion();
+    // Show a toast and refresh the feed (if successful)
+    if (res.ok) {
+      toast.success('DALL-E is finished. Check-out your masterpiece!', {
+        id: notification,
+      });
+      refresh();
+    } else {
+      toast.error('DALL-E had a problem generating your image.', {
+        id: notification,
+      });
+    }
+
+    // If the user used the suggestion, generate a new one
+    if (useSuggestion) {
+      newSuggestion();
+    }
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -81,7 +99,7 @@ export default function PromptInput() {
         <button
           type="button"
           className="p-4 bg-white text-violet-500 font-bold border-none transition-colors rounded-b-md md:rounded-r-md md:rounded-bl-none duration-200"
-          onClick={newSuggestion}
+          onClick={() => newSuggestion()}
         >
           New Suggestion
         </button>

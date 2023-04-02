@@ -1,6 +1,5 @@
-import { Header } from '~/components';
+import { ClientWrapper, Header, PromptInput } from '~/components';
 import '../styles/globals.css';
-import PromptInput from '~/components/PromptInput';
 
 export const metadata = {
   title: 'PixelForge AI Image Generator',
@@ -15,10 +14,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        <PromptInput />
+        <ClientWrapper>
+          <Header />
+          <PromptInput />
 
-        {children}
+          {children}
+        </ClientWrapper>
       </body>
     </html>
   );
