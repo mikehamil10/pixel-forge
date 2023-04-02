@@ -4,7 +4,7 @@ const azureEndpoint = process.env.AZURE_ENDPOINT_BASE_URL;
 
 export async function GET() {
   const response = await fetch(`${azureEndpoint}/api/getImages`, {
-    next: { revalidate: 15 },
+    cache: 'no-store',
   });
 
   const data = await response.json();

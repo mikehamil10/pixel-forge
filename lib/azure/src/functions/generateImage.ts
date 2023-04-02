@@ -41,19 +41,16 @@ export async function generateImage(
   const containerClient =
     blobServiceClient.getContainerClient(azureContainerName);
 
-  const newFileName = `${prompt.replace(
-    /\s/g,
-    '',
-  )}_${new Date().getTime()}.png`;
+  const newFileName = `${prompt}_${new Date().getTime()}.png`;
 
   try {
     const blockBlobClient = containerClient.getBlockBlobClient(newFileName);
     await blockBlobClient.uploadData(blob);
 
-    context.log('File uploaded successfully.');
-    return { body: imageUrl };
+    return { body: 'success' };
   } catch (error: any) {
     context.error('Error uploading file:', error.message);
+    return { body: `error: ${error.message}` };
   }
 }
 

@@ -1,17 +1,19 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import fetchSuggestion from '~/lib/open-ai/chat-gpt/fetchSuggestion';
 import useSWR from 'swr';
+import { useImageFeed } from '~/hooks/useImageFeed';
+import fetchSuggestion from '~/lib/open-ai/chat-gpt/fetchSuggestion';
 
 export default function PromptInput() {
+  const { refresh } = useImageFeed();
   const [input, setInput] = useState('');
 
   const {
     data: suggestion,
     isLoading,
     isValidating,
-    mutate,
+    mutate: newSuggestion,
   } = useSWR('/api/suggestions', fetchSuggestion, {
     revalidateOnFocus: false,
   });
@@ -31,7 +33,9 @@ export default function PromptInput() {
       body: JSON.stringify({ prompt: p }),
     });
 
-    const data = await res.json();
+    await res.json();
+    refresh();
+    newSuggestion();
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -77,7 +81,7 @@ export default function PromptInput() {
         <button
           type="button"
           className="p-4 bg-white text-violet-500 font-bold border-none transition-colors rounded-b-md md:rounded-r-md md:rounded-bl-none duration-200"
-          onClick={mutate}
+          onClick={newSuggestion}
         >
           New Suggestion
         </button>

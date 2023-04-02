@@ -1,28 +1,16 @@
 'use client';
 
-import React from 'react';
-import fetchImages from '~/lib/utils/fetchImages';
-import useSWR from 'swr';
 import Image from 'next/image';
-
-type ImageType = {
-  name: string;
-  url: string;
-};
+import { useImageFeed } from '~/hooks/useImageFeed';
 
 export default function Images() {
-  const {
-    data: images,
-    isLoading,
-    mutate: refreshImages,
-    isValidating,
-  } = useSWR<ImageType[]>('/api/images', fetchImages);
+  const { images, isLoading, isValidating, refresh } = useImageFeed();
 
   return (
     <div>
       <button
         className="fixed bottom-10 right-10 bg-violet-400/90 hover:bg-violet-500 text-white px-5 py-3 rounded-md font-bold focus:ring-2 focus:ring-violet-400 z-20"
-        onClick={() => refreshImages(images)}
+        onClick={() => refresh(images)}
       >
         {!isLoading && isValidating ? 'Refreshing...' : 'Refresh Images'}
       </button>
