@@ -1,13 +1,16 @@
-# AI Image Generator
+# PixelForge
+
+## An AI Image Generator
 
 Built using:
 
 - NextJS + Tailwind
-- Dall-E 2 For Image Generation
 - ChatGPT For Theme Ideation
-- Microsoft Azure Functions
-- Microsoft Storage for saving images
-- Vercel for hosting
+- Dall-E 2 For Image Generation
+
+- Microsoft Azure Cloud Functions (for backend logic)
+- Microsoft Azure Storage (for persisting generated images)
+- Microsoft Azure Static Apps (for app hosting)
 
 ## Getting Started
 
